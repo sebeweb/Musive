@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title></title>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+        <link href="jquery-ui.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./style.css"/>
+    </head>
+    <body>        
+        <video id="vid" width="560" height="315" controls>
+            <source src="http://ie.microsoft.com/testdrive/ieblog/2011/nov/pp4_blog_demo.mp4" >
+        </video>
+        <input id="start" type="number"/>
+        <input id="end" type="number"/>
+        <div id="slider">
+
+        </div>
+        <script src="./script.js"></script>
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="jquery-ui.js"></script>
+        <script>
+            $("#slider").slider({
+                range: true,
+                values: [0, 100]
+            });
+            $("#start").change(function () {
+                var id = $('video').attr('id', 'video');
+                var video = document.getElementById(id);
+//                alert(video);
+                video.currentTime = $("#start").val();
+                video.play();
+                video.loop = true;
+                $(video).on('timeupdate', function () {
+                    if (Math.round(video.currentTime) == $('#end').val()) {
+                        video.currentTime = $("#start").val();
+                        video.play();
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
