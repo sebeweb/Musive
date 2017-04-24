@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+        <link rel="stylesheet" type="text/css" href="css/Main.css">
+        <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    </head>
+    <body>
+ <h1>Exemple boucle vidéo</h1>
+ 
+  <video id="vid" width="560" height="315" controls>
+            <source src="http://ie.microsoft.com/testdrive/ieblog/2011/nov/pp4_blog_demo.mp4" >
+
+ </video>
+ 
+ <div class="test">
+     <video id="vid" width="360" height="225" controls>
+     <source src="http://ie.microsoft.com/testdrive/ieblog/2011/nov/pp4_blog_demo.mp4">
+ </video>
+        <input id="start" type="number"/>
+        <input id="end" type="number"/>
+        </div>
+ <div class="test1">
+     <input class="start" type="number"/>
+     <input class="end" type="number"/>
+ </div>
+
+ 
+ <button onclick="getCurTime()" type="button">clique ici le zin</button>
+ <button onclick="setCurTime()" type="button">Set time position to 5 seconds</button> 
+ <script>
+
+var vid = null;
+
+    vid = document.getElementById("vid");
+  function getCurTime() { 
+    alert(vid.currentTime);
+} 
+    
+
+    vid = document.getElementById("vid");
+    function setCurTime() { 
+    vid.currentTime=25;
+}
+$('input').focusin(function(){
+    var lass = $(this).parent().attr('class');
+    alert(this);
+var id = $('vid').attr('id', lass);
+vid = document.getElementById(id);
+
+});
+
+            $("#start").change(function () {
+               
+                alert(vid);
+                vid.currentTime = $("#start").val();
+                vid.play();
+                vid.loop = true;
+                $(vid).on('timeupdate', function () {
+                    if (Math.round(video.currentTime) == $('#end').val()) {
+                        vid.currentTime = $("#start").val();
+                        vid.play();
+                    }
+                });
+            });
+ 
+   
+
+
+</script> 
+<script>
+
+$( "button" ).button();
+</script>
+    </body>
+</html>
