@@ -13,31 +13,69 @@
         </video>
         <input id="start" type="number"/>
         <input id="end" type="number"/>
-        <div id="slider">
+        <div class="cons">
+            <div class="min">
+                <div id="slider">
 
+                </div>
+            </div>
         </div>
         <script src="./script.js"></script>
         <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
         <script src="jquery-ui.js"></script>
         <script>
+            $(".cons").width($("video").width());
+            $(".min").css({"padding": "5%", "backgroundColor": "gainsboro"});
+            var video = document.getElementById("vid");
             $("#slider").slider({
                 range: true,
-                values: [0, 100]
+                min: 0,
+                values: [0, 100],
+                slide: function slide(event, ui) {
+//                    var min = $("#slider").slider("option", "min", video.currentTime);
+//                    var max = $("#slider").slider("option", "max", video.duration);
+//                    $("#slider").slider("option", "values", [min, video.duration]);
+//                   var max = $(".selector").slider("option", "max");
+//                    var start = $("#start").val(ui.values[0]);
+                    var start = ui.values[0];
+                    var end = ui.values[1];
+//                    var start = min;
+//                    var end = max;
+                    if (start >= 0) {
+                        video.currentTime = start;
+                        video.play();
+                        video.loop = true;
+                        boucle(start, end);
+                    }
+                }
             });
-            $("#start").change(function () {
-                var id = $('video').attr('id', 'video');
-                var video = document.getElementById(id);
-//                alert(video);
-                video.currentTime = $("#start").val();
-                video.play();
-                video.loop = true;
+
+//            var values = $("#slider").slider("values");
+//            $("#start").val(values[0]);
+//            $("#end").val(values[1]);
+
+//            $("#start").change(function () {
+////                alert(video);
+//                video.currentTime = $("#start").val();
+//                video.play();
+//                video.loop = true;
+//                $(video).on('timeupdate', function () {
+//                    if (Math.round(video.currentTime) == $('#end').val()) {
+//                        video.currentTime = $("#start").val();
+//                        video.play();
+//                    }
+//                });
+//            });
+            function boucle(debut, fin) {
+                alert(debut);
                 $(video).on('timeupdate', function () {
-                    if (Math.round(video.currentTime) == $('#end').val()) {
-                        video.currentTime = $("#start").val();
+//                    var start = $("#start").val(fin);
+                    if (Math.round(video.currentTime) == fin) {
+                        video.currentTime = debut;
                         video.play();
                     }
                 });
-            });
+            }
         </script>
     </body>
 </html>
