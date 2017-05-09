@@ -2,26 +2,13 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-//var chanel = require('socket.io')(io);
 var i;
-var mysql = require('mysql');
-var connexion = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'test'
-});
+
 /**
  * Gestion des requêtes HTTP des utilisateurs en leur renvoyant les fichiers du dossier 'public'
  */
-app.use('/:oui', express.static(__dirname + '/public'));
-app.get('/create', function (req, res) {
-    res;
-});
-//app.get("/:room", function (req, res) {
-//    console.log(req.param("room"));
-////    app.use('/' + req.param("room"), express.static(__dirname + '/public'));
-//});
+app.use('/', express.static(__dirname + '/public'));
+
 /**
  * Liste des utilisateurs connectés
  */
@@ -38,7 +25,6 @@ var messages = [];
 var typingUsers = [];
 
 io.on('connection', function (socket) {
-
     /**
      * Utilisateur connecté à la socket
      */
@@ -117,7 +103,6 @@ io.on('connection', function (socket) {
             socket.emit('service-message', userServiceMessage);
             socket.broadcast.emit('service-message', broadcastedServiceMessage);
             messages.push(broadcastedServiceMessage);
-            // Emission de 'user-login' et appel du callback
             io.emit('user-login', loggedUser);
             callback(true);
         } else {
