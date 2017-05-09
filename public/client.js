@@ -84,7 +84,7 @@ socket.on('user-login', function (user) {
  * Déconnexion d'un utilisateur
  */
 socket.on('user-logout', function (user) {
-    //var selector = '#users li.' + user.username;
+    var selector = '#users li.' + user.username;
     $(selector).remove();
 });
 

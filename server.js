@@ -3,11 +3,20 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var i;
+//Salon
+var room;
 
 /**
  * Gestion des requêtes HTTP des utilisateurs en leur renvoyant les fichiers du dossier 'public'
  */
-app.use('/', express.static(__dirname + '/public'));
+app.get('/chat/:channel', function (req, res) {
+    if (req.path !== "/room") {
+        room = req.params.channel;
+//        console.log(room);
+        res.redirect("/room");
+    }
+});
+app.use('/room', express.static(__dirname + '/public'));
 
 /**
  * Liste des utilisateurs connectés
@@ -17,7 +26,14 @@ var users = [];
 /**
  * Historique des messages
  */
-var messages = [];
+//var messages = [];
+
+/*
+ * L'objet messages 
+ */
+var msgs = {
+
+};
 
 /**
  * Liste des utilisateurs en train de saisir un message
@@ -29,22 +45,32 @@ io.on('connection', function (socket) {
      * Utilisateur connecté à la socket
      */
     var loggedUser;
-
+//    console.log(socket.handshake.url);
+    socket.room = room;
+    socket.join(room);
+    /*
+     * Historique des message par salon
+     */
+    msgs[room] = [];
+//    console.log(usr);
+//    console.log(socket.request);
     /**
      * Emission d'un événement "user-login" pour chaque utilisateur connecté
      */
-    for (i = 0; i < users.length; i++) {
-        socket.emit('user-login', users[i]);
-    }
+//    for (i = 0; i < users.length; i++) {
+//        console.log(users[i]);
+//        socket.emit('user-login', users[i]);
+//    }
 
     /** 
      * Emission d'un événement "chat-message" pour chaque message de l'historique
      */
-    for (i = 0; i < messages.length; i++) {
-        if (messages[i].username !== undefined) {
-            socket.emit('chat-message', messages[i]);
+    for (i = 0; i < msgs[room].length; i++) {
+        if (msgs[room][i].username !== undefined) {
+
+            socket.in(socket.room).emit('chat-message', msgs[room][i]);
         } else {
-            socket.emit('service-message', messages[i]);
+            socket.in(socket.room).emit('service-message', msgs[room][i]);
         }
     }
 
@@ -58,16 +84,16 @@ io.on('connection', function (socket) {
                 text: 'Utilisateur "' + loggedUser.username + '" déconnecté',
                 type: 'logout'
             };
-            socket.broadcast.emit('service-message', serviceMessage);
+            socket.broadcast.in(socket.room).emit('service-message', serviceMessage);
             // Suppression de la liste des connectés
             var userIndex = users.indexOf(loggedUser);
             if (userIndex !== -1) {
                 users.splice(userIndex, 1);
             }
             // Ajout du message à l'historique
-            messages.push(serviceMessage);
+            msgs[room].push(serviceMessage);
             // Emission d'un 'user-logout' contenant le user
-            io.emit('user-logout', loggedUser);
+            io.in(socket.room).emit('user-logout', loggedUser);
             // Si jamais il était en train de saisir un texte, on l'enlève de la liste
             var typingUserIndex = typingUsers.indexOf(loggedUser);
             if (typingUserIndex !== -1) {
@@ -91,6 +117,7 @@ io.on('connection', function (socket) {
             // Sauvegarde de l'utilisateur et ajout à la liste des connectés
             loggedUser = user;
             users.push(loggedUser);
+//            console.log(usr);
             // Envoi et sauvegarde des messages de service
             var userServiceMessage = {
                 text: 'Vous êtes connecté en tant que "' + loggedUser.username + '"',
@@ -101,8 +128,9 @@ io.on('connection', function (socket) {
                 type: 'login'
             };
             socket.emit('service-message', userServiceMessage);
-            socket.broadcast.emit('service-message', broadcastedServiceMessage);
-            messages.push(broadcastedServiceMessage);
+            socket.broadcast.to(socket.room).emit('service-message', broadcastedServiceMessage);
+            msgs[room].push(broadcastedServiceMessage);
+//            console.log(loggedUser);
             io.emit('user-login', loggedUser);
             callback(true);
         } else {
@@ -116,11 +144,12 @@ io.on('connection', function (socket) {
     socket.on('chat-message', function (message) {
         // On ajoute le username au message et on émet l'événement
         message.username = loggedUser.username;
-        io.emit('chat-message', message);
+        io.in(socket.room).emit('chat-message', message);
         // Sauvegarde du message
-        messages.push(message);
-        if (messages.length > 150) {
-            messages.splice(0, 1);
+        msgs[room].push(message);
+        console.log(msgs);
+        if (msgs[room].length > 150) {
+            msgs[room].splice(0, 1);
         }
     });
 
@@ -133,7 +162,7 @@ io.on('connection', function (socket) {
         if (typingUsers.indexOf(loggedUser) === -1) {
             typingUsers.push(loggedUser);
         }
-        io.emit('update-typing', typingUsers);
+        io.in(socket.room).emit('update-typing', typingUsers);
     });
 
     /**
@@ -145,7 +174,7 @@ io.on('connection', function (socket) {
         if (typingUserIndex !== -1) {
             typingUsers.splice(typingUserIndex, 1);
         }
-        io.emit('update-typing', typingUsers);
+        io.in(socket.room).emit('update-typing', typingUsers);
     });
 });
 
