@@ -12,7 +12,6 @@ var room;
 app.get('/chat/:channel', function (req, res) {
     if (req.path !== "/room") {
         room = req.params.channel;
-//        console.log(room);
         res.redirect("/room");
     }
 });
@@ -32,7 +31,7 @@ var users = [];
  * L'objet messages 
  */
 var msgs = {
-
+    
 };
 
 /**
@@ -45,35 +44,32 @@ io.on('connection', function (socket) {
      * Utilisateur connecté à la socket
      */
     var loggedUser;
-//    console.log(socket.handshake.url);
     socket.room = room;
     socket.join(room);
     /*
      * Historique des message par salon
      */
     msgs[room] = [];
-//    console.log(usr);
-//    console.log(socket.request);
     /**
      * Emission d'un événement "user-login" pour chaque utilisateur connecté
      */
-//    for (i = 0; i < users.length; i++) {
-//        console.log(users[i]);
-//        socket.emit('user-login', users[i]);
-//    }
-
+    for (i = 0; i < users.length; i++) {
+        console.log(users[i]);
+        socket.emit('user-login', users[i]);
+    }
+    console.log(socket);
     /** 
      * Emission d'un événement "chat-message" pour chaque message de l'historique
      */
     for (i = 0; i < msgs[room].length; i++) {
         if (msgs[room][i].username !== undefined) {
-
+            
             socket.in(socket.room).emit('chat-message', msgs[room][i]);
         } else {
             socket.in(socket.room).emit('service-message', msgs[room][i]);
         }
     }
-
+    
     /**
      * Déconnexion d'un utilisateur
      */
@@ -101,7 +97,7 @@ io.on('connection', function (socket) {
             }
         }
     });
-
+    
     /**
      * Connexion d'un utilisateur via le formulaire :
      */
@@ -117,7 +113,6 @@ io.on('connection', function (socket) {
             // Sauvegarde de l'utilisateur et ajout à la liste des connectés
             loggedUser = user;
             users.push(loggedUser);
-//            console.log(usr);
             // Envoi et sauvegarde des messages de service
             var userServiceMessage = {
                 text: 'Vous êtes connecté en tant que "' + loggedUser.username + '"',
@@ -130,14 +125,13 @@ io.on('connection', function (socket) {
             socket.emit('service-message', userServiceMessage);
             socket.broadcast.to(socket.room).emit('service-message', broadcastedServiceMessage);
             msgs[room].push(broadcastedServiceMessage);
-//            console.log(loggedUser);
             io.emit('user-login', loggedUser);
             callback(true);
         } else {
             callback(false);
         }
     });
-
+    
     /**
      * Réception de l'événement 'chat-message' et réémission vers tous les utilisateurs
      */
@@ -152,7 +146,7 @@ io.on('connection', function (socket) {
             msgs[room].splice(0, 1);
         }
     });
-
+    
     /**
      * Réception de l'événement 'start-typing'
      * L'utilisateur commence à saisir son message
@@ -164,7 +158,7 @@ io.on('connection', function (socket) {
         }
         io.in(socket.room).emit('update-typing', typingUsers);
     });
-
+    
     /**
      * Réception de l'événement 'stop-typing'
      * L'utilisateur a arrêter de saisir son message
