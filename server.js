@@ -31,7 +31,7 @@ var users = [];
  * L'objet messages 
  */
 var msgs = {
-    
+
 };
 
 /**
@@ -54,22 +54,20 @@ io.on('connection', function (socket) {
      * Emission d'un événement "user-login" pour chaque utilisateur connecté
      */
     for (i = 0; i < users.length; i++) {
-        console.log(users[i]);
         socket.emit('user-login', users[i]);
     }
-    console.log(socket);
     /** 
      * Emission d'un événement "chat-message" pour chaque message de l'historique
      */
     for (i = 0; i < msgs[room].length; i++) {
         if (msgs[room][i].username !== undefined) {
-            
+
             socket.in(socket.room).emit('chat-message', msgs[room][i]);
         } else {
             socket.in(socket.room).emit('service-message', msgs[room][i]);
         }
     }
-    
+
     /**
      * Déconnexion d'un utilisateur
      */
@@ -97,7 +95,7 @@ io.on('connection', function (socket) {
             }
         }
     });
-    
+
     /**
      * Connexion d'un utilisateur via le formulaire :
      */
@@ -131,7 +129,7 @@ io.on('connection', function (socket) {
             callback(false);
         }
     });
-    
+
     /**
      * Réception de l'événement 'chat-message' et réémission vers tous les utilisateurs
      */
@@ -146,7 +144,7 @@ io.on('connection', function (socket) {
             msgs[room].splice(0, 1);
         }
     });
-    
+
     /**
      * Réception de l'événement 'start-typing'
      * L'utilisateur commence à saisir son message
@@ -158,7 +156,7 @@ io.on('connection', function (socket) {
         }
         io.in(socket.room).emit('update-typing', typingUsers);
     });
-    
+
     /**
      * Réception de l'événement 'stop-typing'
      * L'utilisateur a arrêter de saisir son message
