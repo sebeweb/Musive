@@ -154,6 +154,6 @@ io.on('connection', function (socket) {
 /**
  * Lancement du serveur en écoutant les connexions arrivant sur le port process.env.PORT
  */
-http.listen(process.env.PORT, function () {
+http.listen(process.env.PORT||5000, function () {
   console.log('Server is listening on process.env.PORT');
 });
