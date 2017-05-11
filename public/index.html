@@ -1,31 +1,32 @@
 <!doctype html>
 <html>
-  <head>
-    <link rel="stylesheet" href="style.css" />
-    <title>Socket.IO chat</title>
-    <style>
-    </style>
-  </head>
-  <body id="logged-out">
-    <section id="chat">
-      <ul id="messages">
-      </ul><ul id="users">
-      </ul>
-      <form action="">
-        <input id="m" autocomplete="off" /><button>Envoyer</button>
-      </form>
-    </section>
-    <section id="login">
-      <form action="">
-        <label for="u">Nom d'utilisateur</label>
-        <input id="u" autocomplete="off" autofocus />
-        <p>
-          <button>Connexion</button>
-        </p>
-      </form>
-    </section>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="client.js"></script>
-  </body>
+    <head>
+        <link rel="stylesheet" href="style.css" />
+        <title>Socket.IO chat</title>
+        <style>
+        </style>
+    </head>
+    <!--<body id="logged-out">-->
+    <body>
+        <section id="chat">
+            <ul id="messages">
+            </ul><ul id="users">
+            </ul>
+            <form action="">
+                <input id="m" autocomplete="off" /><button>Envoyer</button>
+            </form>
+        </section>
+        <!--    <section id="login">
+              <form action="">
+                <label for="u">Nom d'utilisateur</label>
+                <input id="u" autocomplete="off" autofocus />
+                <p>
+                  <button>Connexion</button>
+                </p>
+              </form>
+            </section>-->
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="client.js"></script>
+    </body>
 </html>
