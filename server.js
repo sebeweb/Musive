@@ -55,18 +55,18 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     if (loggedUser !== undefined) {
       // Broadcast d'un 'service-message'
-      var serviceMessage = {
-        text: 'Utilisateur "' + loggedUser.username + '" déconnecté',
-        type: 'logout'
-      };
-      socket.broadcast.emit('service-message', serviceMessage);
+//      var serviceMessage = {
+//        text: 'Utilisateur "' + loggedUser.username + '" déconnecté',
+//        type: 'logout'
+//      };
+//      socket.broadcast.emit('service-message', serviceMessage);
       // Suppression de la liste des connectés
       var userIndex = users.indexOf(loggedUser);
       if (userIndex !== -1) {
         users.splice(userIndex, 1);
       }
       // Ajout du message à l'historique
-      messages.push(serviceMessage);
+//      messages.push(serviceMessage);
       // Emission d'un 'user-logout' contenant le user
       io.emit('user-logout', loggedUser);
       // Si jamais il était en train de saisir un texte, on l'enlève de la liste
@@ -93,17 +93,17 @@ io.on('connection', function (socket) {
       loggedUser = user;
       users.push(loggedUser);
       // Envoi et sauvegarde des messages de service
-      var userServiceMessage = {
-        text: 'Vous êtes connecté en tant que "' + loggedUser.username + '"',
-        type: 'login'
-      };
-      var broadcastedServiceMessage = {
-        text: 'Utilisateur "' + loggedUser.username + '" connecté',
-        type: 'login'
-      };
-      socket.emit('service-message', userServiceMessage);
-      socket.broadcast.emit('service-message', broadcastedServiceMessage);
-      messages.push(broadcastedServiceMessage);
+//      var userServiceMessage = {
+//        text: 'Vous êtes connecté en tant que "' + loggedUser.username + '"',
+//        type: 'login'
+//      };
+//      var broadcastedServiceMessage = {
+//        text: 'Utilisateur "' + loggedUser.username + '" connecté',
+//        type: 'login'
+//      };
+//      socket.emit('service-message', userServiceMessage);
+//      socket.broadcast.emit('service-message', broadcastedServiceMessage);
+//      messages.push(broadcastedServiceMessage);
       // Emission de 'user-login' et appel du callback
       io.emit('user-login', loggedUser);
       callback(true);
