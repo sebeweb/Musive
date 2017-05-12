@@ -1,10 +1,6 @@
 /*global io*/
 /*jslint browser: true*/
-//if (window.location.pathname == "/channel") {
-//    var socket = io("/channel");
-//} else {
-var socket = io.connect("192.168.1.50:3000");
-//}
+var socket = io();
 var i;
 
 /*** Fonctions utiles ***/
