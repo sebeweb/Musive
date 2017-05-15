@@ -105,8 +105,8 @@ section#chat #users li.new {
     color: white;
 }
 section#chat #users li {
-    padding: 3px 5px;
-    margin: 30px 5px;
+    padding: 0px 5px;
+    margin: 31px 5px -16px 5px;
     color: black;
     transition: all 0.5s;
     text-align: center;
@@ -155,4 +155,5 @@ img{
 }
 #reduire{
 	float: right;
+	cursor: pointer;
 }
