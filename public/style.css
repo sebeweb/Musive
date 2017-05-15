@@ -106,7 +106,7 @@ section#chat #users li.new {
 }
 section#chat #users li {
     padding: 3px 5px;
-    margin: 5px 5px;
+    margin: 30px 5px;
     color: black;
     transition: all 0.5s;
     text-align: center;
@@ -152,5 +152,7 @@ section#login button {
 img{	
 	width: 30px;
 	height: 30px;
-	background-color: blue;
+}
+#reduire{
+	float: right;
 }
