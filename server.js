@@ -5,7 +5,28 @@ var io = require('socket.io')(http);
 var i;
 //Salon
 var room;
+//db
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('database');
+db.serialize(function () {
+//    db.run("CREATE TABLE USER");
+    db.run("CREATE TABLE IF NOT EXISTS USER (id INT, mail VARCHAR(255), pseudo VARCHAR(255), room VARCHAR(255))");
+//    db.run("CREATE TABLE IF NOT EXISTS MESSAGES (id INT, message TEXT, room, user)");
 
+    var stmt = db.prepare("INSERT INTO user VALUES (?,?,?,?)");
+    for (var i = 0; i < 10; i++) {
+        var m = "mail " + i;
+        var pseudo = "pseudo " + i;
+        var room = "room";
+        stmt.run(i, m, pseudo, room);
+    }
+    stmt.finalize();
+
+    db.each("SELECT * FROM user", function (err, row) {
+        console.log("User id : " + row.id, row.mail, row.pseudo, row.room);
+    });
+});
+db.close();
 /**
  * Gestion des requêtes HTTP des utilisateurs en leur renvoyant les fichiers du dossier 'public'
  */
@@ -56,7 +77,7 @@ io.on('connection', function (socket) {
     for (i = 0; i < messages[room].length; i++) {
 //        if (messages[room][i].username !== undefined) {
 
-            socket.in(socket.room).emit('chat-message', messages[room][i]);
+        socket.in(socket.room).emit('chat-message', messages[room][i]);
 //        } else {
 //            socket.in(socket.room).emit('service-message', messages[room][i]);
 //        }
