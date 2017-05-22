@@ -7,49 +7,109 @@
         <link href="jquery-ui.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="./style.css"/>
     </head>
-    <body>        
-        <video id="vid" width="560" height="315" controls>
-            <source src="http://ie.microsoft.com/testdrive/ieblog/2011/nov/pp4_blog_demo.mp4" >
-        </video>
-        <input id="start" type="number"/>
-        <input id="end" type="number"/>
-        <div class="cons">
-            <div class="min">
-                <div id="slider">
-
+    <body style="background-color: blue">
+        <div id="just">
+            <div>
+                <div>
+                    <video id="vid" width="560" height="315" controls preload="auto">
+                        <source src="http://ie.microsoft.com/testdrive/ieblog/2011/nov/pp4_blog_demo.mp4" >
+                    </video>
                 </div>
             </div>
         </div>
+        <input id="start" type="number"/>
+        <input id="end" type="number"/>
+        <input id="test"/>
+        <!--        <div class="cons">
+                    <div class="min">
+                        <div id="slider">
+        
+                        </div>
+                    </div>
+                </div>-->
         <script src="./script.js"></script>
         <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
         <script src="jquery-ui.js"></script>
         <script>
-            $(".cons").width($("video").width());
-            $(".min").css({"padding": "5%", "backgroundColor": "gainsboro"});
+            var id;
+//            videojs(vi);
+            var parent = $("video").parents();
+//            var qq = $.Deferred();
             var video = document.getElementById("vid");
-            $("#slider").slider({
-                range: true,
-                min: 0,
-                values: [0, 100],
-                slide: function slide(event, ui) {
-//                    var min = $("#slider").slider("option", "min", video.currentTime);
-//                    var max = $("#slider").slider("option", "max", video.duration);
-//                    $("#slider").slider("option", "values", [min, video.duration]);
-//                   var max = $(".selector").slider("option", "max");
-//                    var start = $("#start").val(ui.values[0]);
-                    var start = ui.values[0];
-                    var end = ui.values[1];
-//                    var start = min;
-//                    var end = max;
-                    if (start >= 0) {
-                        video.currentTime = start;
-                        video.play();
-                        video.loop = true;
-                        boucle(start, end);
+//            $(document).ready(function () {
+//            $.when((isNaN(video.duration) !== true)).done(alert(video.duration));
+//            });
+//            qq.promise($("#slider"));
+//            qq.resolve(video.duration);
+            function createSlider() {
+                for (var i = 0; i < parent.length; i++) {
+//                var verif = parent[i].id;
+                    if (parent[i].id != "") {
+                        $("#" + parent[i].id).append($('<div class="cons"><div class="min"><div id="slider"></div></div></div>'));
+                        $("#test").val(id);
+                        $(".cons").width($("video").width());
+                        $(".min").css({"padding": "5%", "backgroundColor": "gainsboro"});
+//                        $("#slider").slider({
+//                            max: video.duration
+//                        });
+//                        alert(video.duration);
+//                        alert(video.duration);
+                        $("#test").val(video.duration);
+//                        var n = video.duration;
+//                        alert("oui");
+                        $("#slider").slider({
+                            range: true,
+                            min: 0,
+                            max: video.duration,
+                            values: [0, video.duration],
+                            slide: function (event, ui) {
+////                                alert(video.duration);
+////                    var min = $("#slider").slider("option", "min", video.currentTime);
+////                    var max = $("#slider").slider("option", "max", video.duration);
+////                    $("#slider").slider("option", "values", [min, video.duration]);
+////                   var max = $(".selector").slider("option", "max");
+////                    var start = $("#start").val(ui.values[0]);
+                                var start = ui.values[0];
+                                var end = ui.values[1];
+////                    var start = min;
+////                    var end = max;
+//
+//                                video.currentTime = start;
+                                video.play();
+                                video.loop = true;
+                                boucle(start, end);
+//                                var ev = event;
+////                                alert('oui-oui');
+//                    start.change(event, ui);
+                                if (0) {
+                                    video.currentTime = start;
+//                                    video.play();
+                                    boucle(start, end);
+//                                    alert(1);
+                                } else if (end) {
+                                    boucle(video.currentTime, end);
+//                                    alert(2);
+                                } else {
+//                                    alert(3);
+                                    boucle(start, end);
+                                }
+
+                            }
+                        });
                     }
                 }
+            }
+            var vidduration;
+            $(document).ready(function () {
+//                setTimeout(function () {
+//                    vidduration = video.duration;
+//                }, 300);
+                setTimeout(function () {
+                    createSlider();
+//                    vidduration = video.duration;
+//                    $("#slider").slider("option", "values", [1, vidduration]);
+                }, 330);
             });
-
 //            var values = $("#slider").slider("values");
 //            $("#start").val(values[0]);
 //            $("#end").val(values[1]);
@@ -67,10 +127,11 @@
 //                });
 //            });
             function boucle(debut, fin) {
-                alert(debut);
                 $(video).on('timeupdate', function () {
+//                    alert("oui");
 //                    var start = $("#start").val(fin);
                     if (Math.round(video.currentTime) == fin) {
+//                        alert(debut);
                         video.currentTime = debut;
                         video.play();
                     }
