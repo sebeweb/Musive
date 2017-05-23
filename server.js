@@ -8,24 +8,33 @@ var room;
 //db
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('database');
+
 db.serialize(function () {
+    // Database initialization
+    db.get("SELECT * FROM sqlite_master WHERE 'users' ",
+           function(err, rows) {
+      if(err !== null) {
+        console.log(err);
+      }
 //    db.run("CREATE TABLE USER");
-    db.run("CREATE TABLE IF NOT EXISTS USER (id INT, mail VARCHAR(255), pseudo VARCHAR(255), room VARCHAR(255))");
+//    db.run("CREATE TABLE IF NOT EXISTS USER (id INT, mail VARCHAR(255), pseudo VARCHAR(255), room VARCHAR(255))");
 //    db.run("CREATE TABLE IF NOT EXISTS MESSAGES (id INT, message TEXT, room, user)");
 
-    var stmt = db.prepare("INSERT INTO user VALUES (?,?,?,?)");
+    var stmt = db.prepare("INSERT INTO users VALUES (?,?,?,?)");
     for (var i = 0; i < 10; i++) {
         var m = "mail " + i;
         var pseudo = "pseudo " + i;
-        var room = "room";
+        var room = "formation";
         stmt.run(i, m, pseudo, room);
     }
     stmt.finalize();
 
-    db.each("SELECT * FROM user", function (err, row) {
+    db.each("SELECT * FROM users", function (err, row) {
         console.log("User id : " + row.id, row.mail, row.pseudo, row.room);
     });
 });
+
+
 db.close();
 /**
  * Gestion des requêtes HTTP des utilisateurs en leur renvoyant les fichiers du dossier 'public'
@@ -45,7 +54,7 @@ app.use('/room', express.static(__dirname + '/public'));
 var users = [];
 
 /*
- * L'objet messages 
+ * L'objet messages
  */
 var messages = {};
 
@@ -71,7 +80,7 @@ io.on('connection', function (socket) {
     for (i = 0; i < users.length; i++) {
         socket.emit('user-login', users[i]);
     }
-    /** 
+    /**
      * Emission d'un événement "chat-message" pour chaque message de l'historique
      */
     for (i = 0; i < messages[room].length; i++) {
