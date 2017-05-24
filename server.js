@@ -58,6 +58,32 @@ app.get('/create/user/:pseudo', function (req, res) {
     db.close();
 });
 
+app.get('/create/user/:mail', function (req, res) {
+    var mail = req.params.mail;
+    db.serialize(function () {
+        // Database initialization
+//        db.get("SELECT * FROM 'users' ", function (err, rows) {
+//            if (err !== null) {
+//                console.log(err);
+//            }
+        var getUser = db.prepare("SELECT * FROM 'users' WHERE mail=(?)");
+        getUser.get(mail, function (err, row) {
+            //si le mail n'existe pas on la créer et on se connect au chat
+            if (row === undefined) {
+                var stmt = db.prepare("INSERT INTO users(mail) VALUES (?)");
+                stmt.run(mail);
+                stmt.finalize();
+                //sinon on se connect au chat
+            } else {
+                console.log("User id : " + row.id);
+            }
+        });
+        getUser.finalize();
+    });
+});
+//    db.close();
+//});
+
 /**
  * Gestion des requêtes HTTP des utilisateurs en leur renvoyant les fichiers du dossier 'public'
  */
