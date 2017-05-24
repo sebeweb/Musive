@@ -3,47 +3,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var i;
-//db
-var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('data/tchat.db');
 
-db.serialize(function () {
-    // Database initialization
-    db.get("SELECT * FROM users",
-           function(err, rows) {
-      if(err !== null) {
-        console.log(err);
-      }
-//    db.run("CREATE TABLE USER");
-//    db.run("CREATE TABLE IF NOT EXISTS USER (id INT, mail VARCHAR(255), pseudo VARCHAR(255), room VARCHAR(255))");
-//    db.run("CREATE TABLE IF NOT EXISTS MESSAGES (id INT, message TEXT, room, user)");
-
-    var stmt = db.prepare("INSERT INTO users VALUES (?,?,?,?)");
-    for (var i = 0; i < 10; i++) {
-        var m = "mail " + i;
-        var pseudo = "pseudo " + i;
-        var room = "formation";
-        stmt.run(i, m, pseudo, room);
-    }
-    stmt.finalize();
-
-    db.each("SELECT * FROM users", function (err, row) {
-        console.log("User id : " + row.id, row.mail, row.pseudo, row.room);
-    });
-});
-
-
-db.close();
-/**
- * Gestion des requêtes HTTP des utilisateurs en leur renvoyant les fichiers du dossier 'public'
- */
-app.get('/chat/:channel', function (req, res) {
-    var user = req.query.user;
-    if (req.path !== "/room") {
-        room = req.params.channel;
-        res.redirect("/room?" + user);
-    }
-});
 /**
  * Gestion des requêtes HTTP des utilisateurs en leur renvoyant les fichiers du dossier 'public'
  */
@@ -78,7 +38,7 @@ io.on('connection', function (socket) {
     socket.emit('user-login', users[i]);
   }
 
-  /**
+  /** 
    * Emission d'un événement "chat-message" pour chaque message de l'historique
    */
   for (i = 0; i < messages.length; i++) {
@@ -96,7 +56,7 @@ io.on('connection', function (socket) {
     if (loggedUser !== undefined) {
       // Broadcast d'un 'service-message'
       var serviceMessage = {
-        text: 'Utilisateur "' + loggedUser.username + '" déconnecté',
+        text: 'User "' + loggedUser.username + '" disconnected',
         type: 'logout'
       };
       socket.broadcast.emit('service-message', serviceMessage);
@@ -134,11 +94,11 @@ io.on('connection', function (socket) {
       users.push(loggedUser);
       // Envoi et sauvegarde des messages de service
       var userServiceMessage = {
-        text: 'Vous êtes connecté en tant que "' + loggedUser.username + '"',
+        text: 'You logged in as "' + loggedUser.username + '"',
         type: 'login'
       };
       var broadcastedServiceMessage = {
-        text: 'Utilisateur "' + loggedUser.username + '" connecté',
+        text: 'User "' + loggedUser.username + '" logged in',
         type: 'login'
       };
       socket.emit('service-message', userServiceMessage);
@@ -192,8 +152,7 @@ io.on('connection', function (socket) {
 });
 
 /**
- * Lancement du serveur en écoutant les connexions arrivant sur le port process.env.PORT
- * process.env.PORT,
+ * Lancement du serveur en écoutant les connexions arrivant sur le port 3000
  */
 http.listen(3000, function () {
   console.log('Server is listening on *:3000');
