@@ -53,6 +53,14 @@ $('#chat form').submit(function (e) {
     $('#m').val('');
     if (message.text.trim().length !== 0) { // Gestion message vide
         socket.emit('chat-message', message);
+//        alert(window.location.origin);
+        $.ajax({
+            url: window.location.origin + "/new/message/",
+            data: {"msg": message},
+            success: function (data, textStatus, jqXHR) {
+                alert("message envoyer");
+            }
+        });
     }
     $('#chat input').focus(); // Focus sur le champ du message
 });

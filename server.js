@@ -3,6 +3,8 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var i;
+//var id = 1;
+var idUser;
 //Salon
 var room;
 //db
@@ -37,53 +39,73 @@ var db = new sqlite3.Database('data/tchat.db');
 //
 // db.close();
 
-app.get('/create/user/:pseudo', function (req, res) {
-          var  mail = req.params.mail;
-          var pseudo = req.params.pseudo;
-    db.serialize(function () {
-        // Database initialization
-        db.get("SELECT * FROM 'users' ",
-                function (err, rows) {
-                    if (err !== null) {
-                        console.log(err);
-                    }
-                    var stmt = db.prepare("INSERT 'mail' INTO users VALUES (?)");
-                        stmt.run(mail);
-                    stmt.finalize();
-                    db.each("SELECT * FROM users WHERE mail="+mail, function (err, row) {
-                        console.log("User id : " + row.id, row.mail, row.pseudo, row.room);
-                    });
-                });
-    });
-    db.close();
-});
+//app.get('/create/user/:pseudo', function (req, res) {
+//          var  mail = req.params.mail;
+//          var pseudo = req.params.pseudo;
+//    db.serialize(function () {
+//        // Database initialization
+//        db.get("SELECT * FROM 'users' ",
+//                function (err, rows) {
+//                    if (err !== null) {
+//                        console.log(err);
+//                    }
+//                    var stmt = db.prepare("INSERT 'mail' INTO users VALUES (?)");
+//                        stmt.run(mail);
+//                    stmt.finalize();
+//                    db.each("SELECT * FROM users WHERE mail="+mail, function (err, row) {
+//                        console.log("User id : " + row.id, row.mail, row.pseudo, row.room);
+//                    });
+//                });
+//    });
+//    db.close();
+//});
 
 app.get('/create/user/:mail', function (req, res) {
+//app.get('/create/user/', function (req, res) {
     var mail = req.params.mail;
+//    var mail = req.query.mail;
     db.serialize(function () {
-        // Database initialization
-//        db.get("SELECT * FROM 'users' ", function (err, rows) {
-//            if (err !== null) {
-//                console.log(err);
-//            }
         var getUser = db.prepare("SELECT * FROM 'users' WHERE mail=(?)");
         getUser.get(mail, function (err, row) {
             //si le mail n'existe pas on la créer et on se connect au chat
             if (row === undefined) {
+                console.log("undefined");
                 var stmt = db.prepare("INSERT INTO users(mail) VALUES (?)");
                 stmt.run(mail);
                 stmt.finalize();
+//                redirect create pseudo
+                res.redirect("/create/user/" + mail);
                 //sinon on se connect au chat
             } else {
-                console.log("User id : " + row.id);
+                res.redirect("/room?" + row.pseudo);
+                idUser = row.id;
+                console.log("User id : " + row.id, row.mail, row.pseudo);
             }
         });
         getUser.finalize();
     });
 });
-//    db.close();
-//});
 
+app.get('/new/message/', function (req, res) {
+    var msg = req.query.msg;
+    console.log(msg);
+//    console.log("msg");
+    db.serialize(function () {
+        var stmt = db.prepare("INSERT INTO chat_message(id_users, messages,  heure, id_formation) VALUES (?, ?, ?, ?)");
+        var date = new Date();
+//        var date = d.toLocaleTimeString();
+        stmt.run(idUser, msg.text, date, room);
+        stmt.finalize();
+        console.log(idUser);
+        db.each("SELECT chat_message.messages, users.pseudo FROM chat_message WHERE id_formation = users.id", function (err, rows) {
+//            var getUser = db.prepare("SELECT * FROM 'users' WHERE mail=(?)");
+//            getUser.get(row.id_users);
+            for (var row in rows) {
+                console.log(row.id, row.messages, row.pseudo);
+            }
+        });
+    });
+});
 /**
  * Gestion des requêtes HTTP des utilisateurs en leur renvoyant les fichiers du dossier 'public'
  */
@@ -95,23 +117,19 @@ app.get('/chat/:channel', function (req, res) {
     }
 });
 app.use('/room', express.static(__dirname + '/public'));
-
 /**
  * Liste des utilisateurs connectés
  */
 var users = [];
-
 /*
  * L'objet messages
  */
 var messages = {};
-
 /**
  * Liste des utilisateurs en train de saisir un message
  */
 var typingUsers = [];
-
-io.on('connection', function (socket) {
+io.on('connection', function (socket, req) {
     /**
      * Utilisateur connecté à la socket
      */
@@ -167,7 +185,6 @@ io.on('connection', function (socket) {
             }
         }
     });
-
     /**
      * Connexion d'un utilisateur via le formulaire :
      */
@@ -201,14 +218,16 @@ io.on('connection', function (socket) {
             callback(false);
         }
     });
-
     /**
      * Réception de l'événement 'chat-message' et réémission vers tous les utilisateurs
      */
     socket.on('chat-message', function (message) {
         // On ajoute le username au message et on émet l'événement
+//        req. = message.text;
+//        console.log(message.text);
+//        console.log(req);
         message.username = loggedUser.username;
-        io.in(socket.room).emit('chat-message', message);
+        io.in(socket.room).emit('chat-message', messages[room]);
         // Sauvegarde du message
         messages[room].push(message);
 //        console.log(messages);
@@ -216,7 +235,6 @@ io.on('connection', function (socket) {
             messages[room].splice(0, 1);
         }
     });
-
     /**
      * Réception de l'événement 'start-typing'
      * L'utilisateur commence à saisir son message
@@ -228,7 +246,6 @@ io.on('connection', function (socket) {
         }
         io.in(socket.room).emit('update-typing', typingUsers);
     });
-
     /**
      * Réception de l'événement 'stop-typing'
      * L'utilisateur a arrêter de saisir son message
@@ -241,7 +258,6 @@ io.on('connection', function (socket) {
         io.in(socket.room).emit('update-typing', typingUsers);
     });
 });
-
 /**
  * Lancement du serveur en écoutant les connexions arrivant sur le port process.env.PORT
  */
