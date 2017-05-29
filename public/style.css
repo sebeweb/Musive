@@ -51,6 +51,7 @@ section#chat form button {
     margin-right: 0.5%;
     color: white;
     cursor: pointer;
+    font-size: 12px;
 }
 section#chat #messages {
     list-style-type: none;
