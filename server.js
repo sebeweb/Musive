@@ -9,32 +9,26 @@ var idUser;
 var room;
 //db
 var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('data/tchat.db');
+var db = new sqlite3.Database('data/chat.db');
+/*
+ * L'objet messages
+ */
+var messages = {};
 
-// db.serialize(function () {
-//     // Database initialization
+db.serialize(function () {
+    // Database initialization
 //     db.get("SELECT * FROM sqlite_master WHERE 'users' ",
 //            function(err, rows) {
 //       if(err !== null) {
 //         console.log(err);
 //       }
-// //    db.run("CREATE TABLE USER");
-// //    db.run("CREATE TABLE IF NOT EXISTS USER (id INT, mail VARCHAR(255), pseudo VARCHAR(255), room VARCHAR(255))");
-// //    db.run("CREATE TABLE IF NOT EXISTS MESSAGES (id INT, message TEXT, room, user)");
-//
-//     var stmt = db.prepare("INSERT INTO users VALUES (?,?,?,?)");
-//     for (var i = 0; i < 10; i++) {
-//         var m = "mail " + i;
-//         var pseudo = "pseudo " + i;
-//         var room = "formation";
-//         stmt.run(i, m, pseudo, room);
-//     }
-//     stmt.finalize();
-//
-//     db.each("SELECT * FROM users", function (err, row) {
-//         console.log("User id : " + row.id, row.mail, row.pseudo, row.room);
-//     });
-// });
+//            db.run("CREATE TABLE USER");
+    db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY ,pseudo VARCHAR(255), mail VARCHAR(255))");
+    db.run("CREATE TABLE IF NOT EXISTS chat_message (id INTEGER PRIMARY KEY AUTOINCREMENT, id_users integer, messages TEXT,heure TIMESTAMP,id_formation integer, FOREIGN KEY(id_users) REFERENCES users ( id ))");
+    db.run("CREATE TABLE IF NOT EXISTS formation (id INTEGER PRIMARY KEY AUTOINCREMENT,id_users	integer,numero_formation integer,FOREIGN KEY(id) REFERENCES chat_message ( id_formation ))");
+//CREATE TABLE sqlite_sequence(name,seq)
+
+});
 //
 //
 // db.close();
@@ -77,7 +71,7 @@ app.get('/create/user/:mail', function (req, res) {
                 res.redirect("/create/user/" + mail);
                 //sinon on se connect au chat
             } else {
-                res.redirect("/room?" + row.pseudo);
+//                res.redirect("/chat/?user=" + row.pseudo);
                 idUser = row.id;
                 console.log("User id : " + row.id, row.mail, row.pseudo);
             }
@@ -86,24 +80,29 @@ app.get('/create/user/:mail', function (req, res) {
     });
 });
 
-app.get('/new/message/', function (req, res) {
+app.get('/add/message/', function (req, res) {
     var msg = req.query.msg;
     console.log(msg);
-//    console.log("msg");
-    db.serialize(function () {
-        var stmt = db.prepare("INSERT INTO chat_message(id_users, messages,  heure, id_formation) VALUES (?, ?, ?, ?)");
-        var date = new Date();
-//        var date = d.toLocaleTimeString();
-        stmt.run(idUser, msg.text, date, room);
-        stmt.finalize();
-        console.log(idUser);
-        db.each("SELECT chat_message.messages, users.pseudo FROM chat_message WHERE id_formation = users.id", function (err, rows) {
-//            var getUser = db.prepare("SELECT * FROM 'users' WHERE mail=(?)");
-//            getUser.get(row.id_users);
-            for (var row in rows) {
-                console.log(row.id, row.messages, row.pseudo);
-            }
+    if (msg != '') {
+//        console.log();
+        db.serialize(function () {
+            var stmt = db.prepare("INSERT INTO chat_message(id_users, messages,  heure, id_formation) VALUES (?, ?, ?, ?)");
+            var date = new Date();
+            stmt.run(idUser, msg.text, date, room);
+            stmt.finalize();
         });
+    }
+    res.redirect("/get/messages/");
+});
+
+app.get('/get/messages/', function (req, res) {
+    db.all("SELECT * FROM chat_message INNER JOIN users ON chat_message.id_users = users.id  WHERE id_formation =" + room, function (err, rows) {
+        if (messages[room].length == 0) {
+            res.send(rows);
+        } else {
+            res.writeHead(200);
+            res.end('done');
+        }
     });
 });
 /**
@@ -121,10 +120,6 @@ app.use('/room', express.static(__dirname + '/public'));
  * Liste des utilisateurs connectés
  */
 var users = [];
-/*
- * L'objet messages
- */
-var messages = {};
 /**
  * Liste des utilisateurs en train de saisir un message
  */
@@ -140,6 +135,8 @@ io.on('connection', function (socket, req) {
      * Historique des message par salon
      */
     messages[room] = [];
+    console.log(room);
+
     /**
      * Emission d'un événement "user-login" pour chaque utilisateur connecté
      */
@@ -151,7 +148,7 @@ io.on('connection', function (socket, req) {
      */
     for (i = 0; i < messages[room].length; i++) {
 //        if (messages[room][i].username !== undefined) {
-
+        console.log(messages[room][i] + "ko");
         socket.in(socket.room).emit('chat-message', messages[room][i]);
 //        } else {
 //            socket.in(socket.room).emit('service-message', messages[room][i]);
@@ -192,6 +189,7 @@ io.on('connection', function (socket, req) {
         // Vérification que l'utilisateur n'existe pas
         var userIndex = -1;
         for (i = 0; i < users.length; i++) {
+            console.log(users[i].username);
             if (users[i].username === user.username) {
                 userIndex = i;
             }
@@ -224,9 +222,8 @@ io.on('connection', function (socket, req) {
     socket.on('chat-message', function (message) {
         // On ajoute le username au message et on émet l'événement
 //        req. = message.text;
-//        console.log(message.text);
-//        console.log(req);
         message.username = loggedUser.username;
+//        console.log();
         io.in(socket.room).emit('chat-message', messages[room]);
         // Sauvegarde du message
         messages[room].push(message);

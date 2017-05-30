@@ -45,6 +45,19 @@ $(document).ready(function () {
 /**
  * Envoi d'un message
  */
+$.ajax({
+    url: window.location.origin + "/add/message/",
+    data: {"msg": null},
+    success: function (data, textStatus, jqXHR) {
+        if (data !== "done") {
+            for (var i = 0; i < data.length; i++) {
+                $('#messages').append($('<li>').html('<span class="username">' + data[i].pseudo + '</span> ' + data[i].messages));
+                scrollToBottom();
+            }
+        }
+    }
+});
+
 $('#chat form').submit(function (e) {
     e.preventDefault();
     var message = {
@@ -52,13 +65,21 @@ $('#chat form').submit(function (e) {
     };
     $('#m').val('');
     if (message.text.trim().length !== 0) { // Gestion message vide
-        socket.emit('chat-message', message);
 //        alert(window.location.origin);
         $.ajax({
-            url: window.location.origin + "/new/message/",
+            url: window.location.origin + "/add/message/",
             data: {"msg": message},
             success: function (data, textStatus, jqXHR) {
-                alert("message envoyer");
+//                if (data !== "done") {
+//                    for (var j = 0; j < data.length; j++) {
+//                        $('#messages').append($('<li>').html('<span class="username">' + data[j].pseudo + '</span> ' + data[j].messages));
+                        scrollToBottom();
+//                    }
+//                }
+            },
+            complete: function (jqXHR, textStatus) {
+                socket.emit('chat-message', message);
+//                alert("complete");
             }
         });
     }
